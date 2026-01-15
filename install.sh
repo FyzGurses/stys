@@ -21,7 +21,6 @@ echo ""
 
 if [ "$EUID" -ne 0 ]; then
     print_error "Bu script root olarak calistirilmali!"
-    echo "Kullanim: sudo bash install.sh"
     exit 1
 fi
 
@@ -79,9 +78,9 @@ fi
 chown -R $KIOSK_USER:$KIOSK_USER $KIOSK_HOME
 
 print_status "[6/8] Python ortami hazirlaniyor..."
-sudo -u $KIOSK_USER python3 -m venv "$APP_DIR/venv"
-sudo -u $KIOSK_USER "$APP_DIR/venv/bin/pip" install --upgrade pip
-sudo -u $KIOSK_USER "$APP_DIR/venv/bin/pip" install PySide6
+su -c "python3 -m venv $APP_DIR/venv" $KIOSK_USER
+su -c "$APP_DIR/venv/bin/pip install --upgrade pip" $KIOSK_USER
+su -c "$APP_DIR/venv/bin/pip install PySide6" $KIOSK_USER
 
 print_status "[7/8] Sistem yapilandiriliyor..."
 
@@ -114,12 +113,12 @@ systemctl enable nodm
 
 print_status "[8/8] Veritabani baslatiliyor..."
 cd "$APP_DIR"
-sudo -u $KIOSK_USER "$APP_DIR/venv/bin/python" -c "
+su -c "$APP_DIR/venv/bin/python -c \"
 import sys
 sys.path.insert(0, '$APP_DIR')
 from app.main import init_database
 init_database()
-"
+\"" $KIOSK_USER
 
 echo ""
 echo "=========================================="
