@@ -23,7 +23,9 @@ class MainWindow(QMainWindow):
     def _setup_ui(self):
         self.setWindowTitle("Sterilizasyon Takip Sistemi")
         self.setStyleSheet(Styles.main_window())
+        self.setWindowFlags(Qt.FramelessWindowHint)
         self.showFullScreen()
+        self.setCursor(Qt.BlankCursor)
 
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)

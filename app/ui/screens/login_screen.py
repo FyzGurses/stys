@@ -70,12 +70,17 @@ class LoginScreen(QWidget):
         self.user_label.setStyleSheet(f"color: {Colors.TEXT_SECONDARY}; font-size: 12px;")
         self.user_label.setAlignment(Qt.AlignCenter)
 
+        login_btn = PrimaryButton("Giris")
+        login_btn.setMinimumHeight(48)
+        login_btn.clicked.connect(self._on_login_clicked)
+
         back_btn = SecondaryButton("Geri")
         back_btn.clicked.connect(self._reset)
 
         pin_layout.addWidget(pin_label)
         pin_layout.addWidget(self.pin_input)
         pin_layout.addWidget(self.user_label)
+        pin_layout.addWidget(login_btn)
         pin_layout.addWidget(back_btn)
 
         self.error_label = QLabel("")
@@ -100,6 +105,11 @@ class LoginScreen(QWidget):
 
     def _on_pin_entered(self, pin: str):
         self.login_requested.emit(self.badge_number, pin)
+
+    def _on_login_clicked(self):
+        pin = self.pin_input.get_pin()
+        if pin and self.badge_number:
+            self.login_requested.emit(self.badge_number, pin)
 
     def _reset(self):
         self.badge_number = ""
