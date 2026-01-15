@@ -55,7 +55,6 @@ fi
 usermod -aG tty,video $KIOSK_USER
 
 print_status "[4/8] Dizinler olusturuluyor..."
-mkdir -p $APP_DIR
 mkdir -p $KIOSK_HOME/data
 mkdir -p $KIOSK_HOME/logs
 mkdir -p $KIOSK_HOME/.config/openbox
@@ -63,24 +62,15 @@ mkdir -p $KIOSK_HOME/.config/openbox
 print_status "[5/8] Uygulama dosyalari kopyalaniyor..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-cp "$SCRIPT_DIR/app/main.py" "$APP_DIR/"
-cp -r "$SCRIPT_DIR/app/config" "$APP_DIR/"
-cp -r "$SCRIPT_DIR/app/core" "$APP_DIR/"
-cp -r "$SCRIPT_DIR/app/models" "$APP_DIR/"
-cp -r "$SCRIPT_DIR/app/services" "$APP_DIR/"
-cp -r "$SCRIPT_DIR/app/utils" "$APP_DIR/"
-cp -r "$SCRIPT_DIR/app/ui" "$APP_DIR/"
-
-if [ -f "$SCRIPT_DIR/app/database.py" ]; then
-    cp "$SCRIPT_DIR/app/database.py" "$APP_DIR/"
-fi
+rm -rf "$APP_DIR"
+cp -r "$SCRIPT_DIR/app" "$KIOSK_HOME/"
 
 chown -R $KIOSK_USER:$KIOSK_USER $KIOSK_HOME
 
 print_status "[6/8] Python ortami hazirlaniyor..."
-su -c "python3 -m venv $APP_DIR/venv" $KIOSK_USER
-su -c "$APP_DIR/venv/bin/pip install --upgrade pip" $KIOSK_USER
-su -c "$APP_DIR/venv/bin/pip install PySide6" $KIOSK_USER
+su -c "python3 -m venv $KIOSK_HOME/venv" $KIOSK_USER
+su -c "$KIOSK_HOME/venv/bin/pip install --upgrade pip" $KIOSK_USER
+su -c "$KIOSK_HOME/venv/bin/pip install PySide6" $KIOSK_USER
 
 print_status "[7/8] Sistem yapilandiriliyor..."
 
@@ -101,9 +91,9 @@ xset s off
 xset -dpms
 xset s noblank
 unclutter -idle 1 -root &
-cd /home/kiosk/app
-export PYTHONPATH="/home/kiosk/app"
-exec /home/kiosk/app/venv/bin/python -m app.main
+cd /home/kiosk
+export PYTHONPATH="/home/kiosk"
+exec /home/kiosk/venv/bin/python -m app.main
 EOF
 
 chmod +x $KIOSK_HOME/.xsession
@@ -112,13 +102,11 @@ chown $KIOSK_USER:$KIOSK_USER $KIOSK_HOME/.xsession
 systemctl enable nodm
 
 print_status "[8/8] Veritabani baslatiliyor..."
-cd "$APP_DIR"
-su -c "$APP_DIR/venv/bin/python -c \"
-import sys
-sys.path.insert(0, '$APP_DIR')
+cd "$KIOSK_HOME"
+su -c "PYTHONPATH=$KIOSK_HOME $KIOSK_HOME/venv/bin/python -c '
 from app.main import init_database
 init_database()
-\"" $KIOSK_USER
+'" $KIOSK_USER
 
 echo ""
 echo "=========================================="
