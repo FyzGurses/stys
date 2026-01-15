@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QMainWindow, QStackedWidget, QMessageBox
+from PySide6.QtWidgets import QMainWindow, QStackedWidget, QMessageBox, QApplication
 from PySide6.QtCore import Qt
 
 from app.ui.styles import Styles
@@ -50,6 +50,7 @@ class MainWindow(QMainWindow):
         self.dashboard_screen.logout_requested.connect(self._on_logout)
         self.dashboard_screen.zone_selected.connect(self._on_zone_selected)
         self.dashboard_screen.barcode_scanned.connect(self._on_barcode_scanned)
+        self.dashboard_screen.exit_requested.connect(self._on_exit)
 
         self.zone_selector.zone_selected.connect(self._on_zone_selected)
         self.zone_selector.back_requested.connect(self._show_dashboard)
@@ -79,6 +80,16 @@ class MainWindow(QMainWindow):
     def _on_logout(self):
         self.auth_service.logout()
         self.stack.setCurrentWidget(self.login_screen)
+
+    def _on_exit(self):
+        reply = QMessageBox.question(
+            self, "Cikis",
+            "Uygulamayi kapatmak istediginize emin misiniz?",
+            QMessageBox.Yes | QMessageBox.No
+        )
+        if reply == QMessageBox.Yes:
+            self.auth_service.logout()
+            QApplication.quit()
 
     def _show_dashboard(self):
         self.dashboard_screen.update_user_info()

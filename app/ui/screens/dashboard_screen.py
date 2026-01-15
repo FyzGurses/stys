@@ -15,6 +15,7 @@ class DashboardScreen(QWidget):
     barcode_scanned = Signal(str)
     zone_selected = Signal(str)
     logout_requested = Signal()
+    exit_requested = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -65,9 +66,25 @@ class DashboardScreen(QWidget):
         logout_btn.setFixedWidth(120)
         logout_btn.clicked.connect(self.logout_requested.emit)
 
+        exit_btn = PrimaryButton("Sistemi Kapat")
+        exit_btn.setFixedWidth(140)
+        exit_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {Colors.DANGER};
+                color: white;
+                border: none;
+                border-radius: 8px;
+                padding: 12px 24px;
+                font-size: 14px;
+                font-weight: bold;
+            }}
+        """)
+        exit_btn.clicked.connect(self.exit_requested.emit)
+
         header.addLayout(left)
         header.addStretch()
         header.addWidget(logout_btn)
+        header.addWidget(exit_btn)
 
         return header
 
