@@ -286,6 +286,27 @@ def init_database():
         )
     """)
 
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS permissions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            code TEXT UNIQUE NOT NULL,
+            name TEXT NOT NULL,
+            description TEXT,
+            module TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS role_permissions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            role_id INTEGER REFERENCES roles(id),
+            permission_id INTEGER REFERENCES permissions(id),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(role_id, permission_id)
+        )
+    """)
+
     db.commit()
 
     existing = db.fetchone("SELECT id FROM roles WHERE code = 'ADMIN'")
