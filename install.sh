@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-REPO_URL="https://github.com/USER/REPO.git"
-INSTALL_DIR="/opt/kiosk-mvp"
 KIOSK_USER="kiosk"
 KIOSK_HOME="/home/$KIOSK_USER"
 APP_DIR="$KIOSK_HOME/app"
@@ -28,11 +26,11 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 print_status "[1/8] Sistem guncelleniyor..."
-apt-get update -qq
-apt-get upgrade -y -qq
+apt-get update
+apt-get upgrade -y
 
 print_status "[2/8] Gerekli paketler kuruluyor..."
-apt-get install -y -qq \
+apt-get install -y \
     xorg \
     openbox \
     nodm \
@@ -43,8 +41,8 @@ apt-get install -y -qq \
     git \
     libxcb-xinerama0 \
     libxcb-cursor0 \
-    libgl1-mesa-glx \
-    libegl1-mesa \
+    libgl1 \
+    libegl1 \
     libxkbcommon0 \
     libdbus-1-3 \
     fontconfig
@@ -82,8 +80,8 @@ chown -R $KIOSK_USER:$KIOSK_USER $KIOSK_HOME
 
 print_status "[6/8] Python ortami hazirlaniyor..."
 sudo -u $KIOSK_USER python3 -m venv "$APP_DIR/venv"
-sudo -u $KIOSK_USER "$APP_DIR/venv/bin/pip" install --upgrade pip -q
-sudo -u $KIOSK_USER "$APP_DIR/venv/bin/pip" install PySide6 -q
+sudo -u $KIOSK_USER "$APP_DIR/venv/bin/pip" install --upgrade pip
+sudo -u $KIOSK_USER "$APP_DIR/venv/bin/pip" install PySide6
 
 print_status "[7/8] Sistem yapilandiriliyor..."
 
@@ -114,7 +112,7 @@ chown $KIOSK_USER:$KIOSK_USER $KIOSK_HOME/.xsession
 
 systemctl enable nodm
 
-print_status "[8/8] Veritabani baslatılıyor..."
+print_status "[8/8] Veritabani baslatiliyor..."
 cd "$APP_DIR"
 sudo -u $KIOSK_USER "$APP_DIR/venv/bin/python" -c "
 import sys
